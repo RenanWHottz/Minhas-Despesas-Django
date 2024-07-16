@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatórios</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background-color: #5A9;
+            padding: 15px;
+        }
+
+        header a {
+            text-decoration: none;
+            padding: 10px 20px;
+            color: #fff;
+            background-color: #5A9;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        header a:hover {
+            background-color: #4A8;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .content {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .report-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #6C7;
+            color: #fff;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+
+        .report-button:hover {
+            background-color: #5A9;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="{% url 'grupo_despesas_form' %}">Cadastro de Grupos de Despesas</a>
+        <a href="{% url 'despesa_form' %}">Cadastro de Despesas</a>
+        <a href="{% url 'listagem' %}">Listagem de Despesas</a>
+        <a href="{% url 'relatorios' %}">Relatórios</a>
+    </header>
+    <h1>Relatórios</h1>
+    <div class="content">
+        <p>Selecione um relatório para visualizar:</p>
+        <a href="{% url 'relatorio_despesas_por_grupo' %}" class="report-button">Relatório de Despesas por Grupo</a>
+        <a href="#" class="report-button">#</a>
+        <a href="#" class="report-button">#</a>
+    </div>
+</body>

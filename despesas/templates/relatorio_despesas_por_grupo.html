@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de Despesas por Grupo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+        header {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background-color: #5A9;
+            padding: 15px;
+        }
+        header a {
+            text-decoration: none;
+            padding: 10px 20px;
+            color: #fff;
+            background-color: #5A9;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        header a:hover {
+            background-color: #4A8;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .filter-group {
+            display: flex;
+            justify-content: center;
+            margin: 20px;
+        }
+        select, button {
+            padding: 10px;
+            margin: 0 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .results {
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="{% url 'grupo_despesas_form' %}">Cadastro de Grupos de Despesas</a>
+        <a href="{% url 'despesa_form' %}">Cadastro de Despesas</a>
+        <a href="{% url 'listagem' %}">Listagem de Despesas</a>
+        <a href="{% url 'relatorios' %}">Relatórios</a>
+    </header>
+    <h1>Relatório de Despesas por Grupo</h1>
+    <div class="filter-group">
+        <form method="get" action="{% url 'relatorio_despesas_por_grupo' %}">
+            <select name="grupo_id">
+                <option value="">Selecione um grupo</option>
+                {% for grupo in grupos %}
+                    <option value="{{ grupo.id }}" {% if grupo.id|stringformat:"s" == grupo_id|stringformat:"s" %}selected{% endif %}>{{ grupo.nome }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit">Gerar Relatório</button>
+        </form>
+    </div>
+    {% if total_pago is not None and percentual is not None %}
+    <div class="results">
+        <p>Total Pago: R$ {{ total_pago }}</p>
+        <p>Percentual do Total Geral Pago: {{ percentual }}%</p>
+    </div>
+    {% endif %}
+</body>
+</html>

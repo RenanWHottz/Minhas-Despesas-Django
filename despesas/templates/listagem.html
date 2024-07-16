@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listar Despesas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+        header {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background-color: #5A9;
+            padding: 15px;
+        }
+        header a {
+            text-decoration: none;
+            padding: 10px 20px;
+            color: #fff;
+            background-color: #5A9;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        header a:hover {
+            background-color: #4A8;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .filter-group {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .filter-group label,
+        .filter-group input,
+        .filter-group select {
+            margin: 0 10px;
+        }
+        table {
+            width: 90%;
+            margin: 0 auto;
+            border-collapse: collapse;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .btn-group {
+            display: flex;
+            justify-content: space-between;
+        }
+        .btn-group button {
+            margin-right: 5px;
+            padding: 5px 10px;
+            background-color: #6C7;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .btn-group button:hover {
+            background-color: #5A9;
+        }
+        tfoot td {
+            font-weight: bold;
+            background-color: #e0e0e0;
+        }
+    </style>
+    <script>
+        function formatarData(data) {
+            if (!data) return '';
+            const [ano, mes, dia] = data.split('-');
+            return `${dia}-${mes}-${ano}`;
+        }
+
+        function filtrarDespesas() {
+            const filtroNome = document.getElementById('filtro_nome').value;
+            const dataInicio = document.getElementById('data_inicio').value;
+            const dataFim = document.getElementById('data_fim').value;
+            const filtroEstado = document.getElementById('filtro_estado').value;
+
+            fetch(`/listagem/?filtro_nome=${filtroNome}&data_inicio=${dataInicio}&data_fim=${dataFim}&filtro_estado=${filtroEstado}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    const tbody = document.querySelector('tbody');
+                    tbody.innerHTML = '';
+
+                    let totalValor = 0;
+                    let totalValorPago = 0;
+
+                    data.despesas.forEach(despesa => {
+                        const tr = document.createElement('tr');
+
+                        tr.innerHTML = `
+                            <td>${despesa.nome}</td>
+                            <td>${despesa.grupo}</td>
+                            <td>${formatarData(despesa.vencimento)}</td>
+                            <td>${despesa.valor}</td>
+                            <td>${formatarData(despesa.data_pagamento)}</td>
+                            <td>${despesa.valor_pago}</td>
+                            <td>${despesa.observacao}</td>
+                            <td class="btn-group">
+                                <form method="post" action="/excluir_despesa/${despesa.id}">
+                                    <input type="hidden" name="csrfmiddlewaretoken" value="${data.csrf_token}">
+                                    <button type="submit">Excluir</button>
+                                </form>
+                                <form method="get" action="/alterar_despesa/${despesa.id}">
+                                    <button type="submit">Alterar</button>
+                                </form>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+
+                        if (despesa.valor) {
+                            totalValor += parseFloat(despesa.valor);
+                        }
+                        if (despesa.valor_pago) {
+                            totalValorPago += parseFloat(despesa.valor_pago);
+                        }
+                    });
+
+                    document.getElementById('total_valor').textContent = totalValor.toFixed(2);
+                    document.getElementById('total_valor_pago').textContent = totalValorPago.toFixed(2);
+                });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('filtro_nome').addEventListener('input', filtrarDespesas);
+            document.getElementById('data_inicio').addEventListener('input', filtrarDespesas);
+            document.getElementById('data_fim').addEventListener('input', filtrarDespesas);
+            document.getElementById('filtro_estado').addEventListener('change', filtrarDespesas);
+            filtrarDespesas();
+        });
+    </script>
+</head>
+
+<body>
+    <header>
+        <a href="{% url 'grupo_despesas_form' %}">Cadastro de Grupos de Despesas</a>
+        <a href="{% url 'despesa_form' %}">Cadastro de Despesas</a>
+        <a href="{% url 'listagem' %}">Listagem de Despesas</a>
+        <a href="{% url 'relatorios' %}">Relatórios</a>
+    </header>
+    <h1>Listar Despesas</h1>
+    <div class="filter-group">
+        <input type="text" id="filtro_nome" placeholder="Filtrar por nome...">
+        <label for="data_inicio">Data de Início:</label>
+        <input type="date" id="data_inicio">
+        <label for="data_fim">Data de Fim:</label>
+        <input type="date" id="data_fim">
+        <label for="filtro_estado">Status:</label>
+        <select id="filtro_estado">
+            <option value="todas">Todas</option>
+            <option value="abertas">Abertas</option>
+            <option value="pagas">Pagas</option>
+        </select>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Grupo</th>
+                <th>Data de Vencimento</th>
+                <th>Valor</th>
+                <th>Data de Pagamento</th>
+                <th>Valor Pago</th>
+                <th>Observações</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for despesa in despesas %}
+            <tr>
+                <td>{{ despesa.nome }}</td>
+                <td>{{ despesa.grupo.nome }}</td>
+                <td>{{ despesa.vencimento|date:"d/m/Y" }}</td>
+                <td>{{ despesa.valor }}</td>
+                <td>{{ despesa.data_pagamento|date:"d/m/Y" }}</td>
+                <td>{{ despesa.valor_pago }}</td>
+                <td>{{ despesa.observacao }}</td>
+                <td class="btn-group">
+                    <form method="post" action="{% url 'excluir_despesa' despesa.id %}">
+                        {% csrf_token %}
+                        <button type="submit">Excluir</button>
+                    </form>
+                    <form method="get" action="{% url 'alterar_despesa' despesa.id %}">
+                        <button type="submit">Alterar</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3">Total:</td>
+                <td id="total_valor">0.00</td>
+                <td>Total Pago:</td>
+                <td id="total_valor_pago" colspan="2">0.00</td>
+                <td colspan="1"></td>
+            </tr>
+        </tfoot>
+    </table>
+</body>
+</html>
+

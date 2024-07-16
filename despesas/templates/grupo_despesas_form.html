@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Grupo de Despesas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+        header {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background-color: #5A9;
+            padding: 15px;
+        }
+
+        header a {
+            text-decoration: none;
+            padding: 10px 20px;
+            color: #fff;
+            background-color: #5A9;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        header a:hover {
+            background-color: #4A8;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1, h2 {
+            color: #333;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        label, input[type="text"], input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        
+        input[type="submit"] {
+            background-color: #6C7;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #5A9;
+        }
+        table {
+            width: 100%;
+            margin: 20px 0;
+            border-collapse: collapse;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        td form {
+            display: inline;
+        }
+        td button {
+            padding: 5px 10px;
+            background-color: #6C7;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        td button:hover {
+            background-color: #5A9;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="{% url 'grupo_despesas_form' %}">Cadastro de Grupos de Despesas</a>
+        <a href="{% url 'despesa_form' %}">Cadastro de Despesas</a>
+        <a href="{% url 'listagem' %}">Listagem de Despesas</a>
+        <a href="{% url 'relatorios' %}">Relatórios</a>
+    </header>
+    <div class="container">
+        <h1>Registrar Grupo de Despesas</h1>
+        <form method="post">
+            {% csrf_token %}
+            <label for="id_nome">Nome:</label>
+            <input type="text" id="id_nome" name="nome" required>
+            <input type="submit" value="Registrar">
+        </form>
+        
+        <h2>Lista de Grupos</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for grupo in grupos %}
+                <tr>
+                    <td>{{ grupo.nome }}</td>
+                    <td>
+                        <form method="post" action="{% url 'excluir_grupo_despesas' grupo.id %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit">Excluir</button>
+                        </form>
+                        <form method="get" action="{% url 'alterar_grupo_despesas' grupo.id %}" style="display:inline;">
+                            <button type="submit">Alterar</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
+
