@@ -149,6 +149,7 @@ def relatorios(request):
 def relatorio_despesas_por_grupo(request):
     grupo_id = request.GET.get('grupo_id')
     total_pago = None
+    total_em_aberto = None
     percentual = None
     
     grupos = GrupoDespesas.objects.all()
@@ -160,10 +161,13 @@ def relatorio_despesas_por_grupo(request):
         if total_geral_pago > 0:
             percentual = round((despesas_grupo / total_geral_pago) * 100, 2)
         total_pago = round(despesas_grupo, 2)
-    
+        total_em_aberto = Despesa.objects.filter(grupo_id=grupo_id, data_pagamento__isnull=True).aggregate(total_em_aberto=Sum('valor'))['total_em_aberto'] or 0
+        total_em_aberto = round(total_em_aberto, 2)
+
     context = {
         'grupos': grupos,
         'total_pago': total_pago,
+        'total_em_aberto': total_em_aberto,
         'percentual': percentual,
         'grupo_id': grupo_id,
     }

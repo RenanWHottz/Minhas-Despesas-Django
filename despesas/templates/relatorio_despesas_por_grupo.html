@@ -72,6 +72,7 @@
     {% if total_pago is not None and percentual is not None %}
     <div class="results">
         <p>Total Pago: R$ {{ total_pago }}</p>
+        <p>Total em Aberto: R$ {{ total_em_aberto }}</p>
         <p>Percentual do Total Geral Pago: {{ percentual }}%</p>
     </div>
     {% endif %}
