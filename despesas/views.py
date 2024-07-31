@@ -51,6 +51,7 @@ def listar_despesas(request):
     data_inicio = request.GET.get('data_inicio', '')
     data_fim = request.GET.get('data_fim', '')
     filtro_estado = request.GET.get('filtro_estado', 'todas')
+    filtro_grupo = request.GET.get('filtro_grupo', '')
 
     despesas = Despesa.objects.all().order_by('-vencimento')
 
@@ -72,6 +73,9 @@ def listar_despesas(request):
     elif filtro_estado == 'pagas':
         despesas = despesas.filter(data_pagamento__isnull=False)
 
+    if filtro_grupo:
+        despesas = despesas.filter(grupo_id=filtro_grupo)
+
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         despesas_list = [
             {
@@ -88,7 +92,8 @@ def listar_despesas(request):
         ]
         return JsonResponse({'despesas': despesas_list, 'csrf_token': csrf.get_token(request)})
     
-    return render(request, 'listagem.html', {'despesas': despesas})
+    grupos = GrupoDespesas.objects.all()
+    return render(request, 'listagem.html', {'despesas': despesas, 'grupos': grupos})
 
 def excluir_despesa(request, despesa_id):
     despesa = get_object_or_404(Despesa, pk=despesa_id)
