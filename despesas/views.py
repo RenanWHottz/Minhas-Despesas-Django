@@ -6,6 +6,11 @@ from django.middleware import csrf
 from django.utils.dateparse import parse_date
 from django.db.models import Sum
 from datetime import datetime
+from django.db.models.functions import TruncMonth
+from io import BytesIO
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+import base64
 
 def grupo_despesas_form(request):
     if request.method == 'POST':
@@ -156,18 +161,61 @@ def relatorio_despesas_por_grupo(request):
     total_pago = None
     total_em_aberto = None
     percentual = None
-    
+    despesas_pagas_por_mes = []
+    despesas_abertas_por_mes = []
+
     grupos = GrupoDespesas.objects.all()
 
     if grupo_id:
-        despesas_grupo = Despesa.objects.filter(grupo_id=grupo_id).aggregate(total_pago=Sum('valor_pago'))['total_pago'] or 0
-        total_geral_pago = Despesa.objects.aggregate(total_pago=Sum('valor_pago'))['total_pago'] or 0
+        despesas_grupo = Despesa.objects.filter(grupo_id=grupo_id)
+
+        despesas_pagas = despesas_grupo.filter(data_pagamento__isnull=False).annotate(month=TruncMonth('vencimento')).values('month').annotate(total=Sum('valor')).order_by('month')
+        despesas_abertas = despesas_grupo.filter(data_pagamento__isnull=True).annotate(month=TruncMonth('vencimento')).values('month').annotate(total=Sum('valor')).order_by('month')
         
+        #Dados do Gráfico
+        meses = sorted(set(despesa['month'] for despesa in despesas_pagas) | set(despesa['month'] for despesa in despesas_abertas))
+        despesas_pagas_por_mes = {mes: 0 for mes in meses}
+        despesas_abertas_por_mes = {mes: 0 for mes in meses}
+
+        for despesa in despesas_pagas:
+            despesas_pagas_por_mes[despesa['month']] = despesa['total']
+
+        for despesa in despesas_abertas:
+            despesas_abertas_por_mes[despesa['month']] = despesa['total']
+
+        meses = [mes.strftime('%m/%Y') for mes in meses]
+        valores_pagos = [despesas_pagas_por_mes[mes] for mes in despesas_pagas_por_mes]
+        valores_abertos = [despesas_abertas_por_mes[mes] for mes in despesas_abertas_por_mes]
+
+        #Gráfico de Barras
+        x = range(len(meses))
+
+        plt.figure(figsize=(10, 5))
+        plt.bar(x, valores_pagos, width=0.4, label='Despesas Pagas', align='center')
+        plt.bar(x, valores_abertos, width=0.4, label='Despesas Abertas', align='edge')
+        plt.xlabel('Mês de Vencimento')
+        plt.ylabel('Valor R$')
+        plt.title('Despesas Pagas e Abertas por Mês')
+        plt.legend()
+        plt.xticks(ticks=x, labels=meses, rotation=45)
+        plt.tight_layout()
+
+        buffer = BytesIO()
+        plt.savefig(buffer, format='png')
+        buffer.seek(0)
+        image_png = buffer.getvalue()
+        buffer.close()
+
+        grafico_base64 = base64.b64encode(image_png).decode('utf-8')
+
+        despesas_grupo_total_pago = despesas_grupo.filter(data_pagamento__isnull=False).aggregate(total=Sum('valor_pago'))['total'] or 0
+        total_geral_pago = Despesa.objects.filter(data_pagamento__isnull=False).aggregate(total=Sum('valor_pago'))['total'] or 0
+
         if total_geral_pago > 0:
-            percentual = round((despesas_grupo / total_geral_pago) * 100, 2)
-        total_pago = round(despesas_grupo, 2)
-        total_em_aberto = Despesa.objects.filter(grupo_id=grupo_id, data_pagamento__isnull=True).aggregate(total_em_aberto=Sum('valor'))['total_em_aberto'] or 0
-        total_em_aberto = round(total_em_aberto, 2)
+            percentual = round((despesas_grupo_total_pago / total_geral_pago) * 100, 2)
+
+        total_pago = round(despesas_grupo_total_pago, 2)
+        total_em_aberto = round(despesas_grupo.filter(data_pagamento__isnull=True).aggregate(total=Sum('valor'))['total'] or 0, 2)
 
     context = {
         'grupos': grupos,
@@ -175,6 +223,7 @@ def relatorio_despesas_por_grupo(request):
         'total_em_aberto': total_em_aberto,
         'percentual': percentual,
         'grupo_id': grupo_id,
+        'grafico_base64': grafico_base64 if grupo_id else None,
     }
 
     return render(request, 'relatorio_despesas_por_grupo.html', context)
