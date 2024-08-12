@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Relatórios</title>
+    <title>Relatório Geral</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -11,7 +11,6 @@
             padding: 0;
             background-color: #f9f9f9;
         }
-
         header {
             display: flex;
             justify-content: space-around;
@@ -19,7 +18,6 @@
             background-color: #5A9;
             padding: 15px;
         }
-
         header a {
             text-decoration: none;
             padding: 10px 20px;
@@ -28,33 +26,32 @@
             border-radius: 5px;
             transition: background-color 0.3s;
         }
-
         header a:hover {
             background-color: #4A8;
         }
-
         h1 {
             text-align: center;
             color: #333;
         }
-
-        .content {
-            padding: 20px;
-            text-align: center;
+        .filter-group {
+            display: flex;
+            justify-content: center;
+            margin: 20px;
         }
-
-        .report-button {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #6C7;
-            color: #fff;
+        select, button {
+            padding: 10px;
+            margin: 0 10px;
             border-radius: 5px;
-            text-decoration: none;
-            transition: background-color 0.3s;
+            border: 1px solid #ccc;
         }
-
-        .report-button:hover {
-            background-color: #5A9;
+        .results {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .chart {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -65,11 +62,9 @@
         <a href="{% url 'listagem' %}">Listagem de Despesas</a>
         <a href="{% url 'relatorios' %}">Relatórios</a>
     </header>
-    <h1>Relatórios</h1>
-    <div class="content">
-        <p>Selecione um relatório para visualizar:</p>
-        <a href="{%url 'relatorio_geral'%}" class="report-button">Relatório Geral</a>
-        <a href="{% url 'relatorio_despesas_por_grupo' %}" class="report-button">Relatório de Despesas por Grupo</a>
-        <a href="#" class="report-button">#</a>
+    <h1>Relatório Geral</h1>
+    <div class="chart">
+        <img src="data:image/png;base64,{{ chart }}" alt="Gráfico de Despesas por Grupo">
     </div>
 </body>
+</html>

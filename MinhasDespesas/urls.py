@@ -11,5 +11,5 @@ urlpatterns = [
     path('alterar_grupo_despesas/<int:grupo_id>/', views.alterar_grupo_despesas, name='alterar_grupo_despesas'),
     path('relatorios/', views.relatorios, name='relatorios'),
     path('relatorio_despesas_por_grupo/', views.relatorio_despesas_por_grupo, name='relatorio_despesas_por_grupo'),
-    path('relatorio_despesas_por_grupo/', views.relatorio_despesas_por_grupo, name='relatorio_despesas_por_grupo'),
+    path('relatorio_geral/', views.relatorio_geral, name='relatorio_geral'),
 ]

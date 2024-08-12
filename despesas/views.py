@@ -10,7 +10,8 @@ from django.db.models.functions import TruncMonth
 from io import BytesIO
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-import base64
+import urllib, base64
+import io
 
 def grupo_despesas_form(request):
     if request.method == 'POST':
@@ -172,7 +173,7 @@ def relatorio_despesas_por_grupo(request):
         despesas_pagas = despesas_grupo.filter(data_pagamento__isnull=False).annotate(month=TruncMonth('vencimento')).values('month').annotate(total=Sum('valor')).order_by('month')
         despesas_abertas = despesas_grupo.filter(data_pagamento__isnull=True).annotate(month=TruncMonth('vencimento')).values('month').annotate(total=Sum('valor')).order_by('month')
         
-        #Dados do Gráfico
+        # Dados do Gráfico
         meses = sorted(set(despesa['month'] for despesa in despesas_pagas) | set(despesa['month'] for despesa in despesas_abertas))
         despesas_pagas_por_mes = {mes: 0 for mes in meses}
         despesas_abertas_por_mes = {mes: 0 for mes in meses}
@@ -187,18 +188,28 @@ def relatorio_despesas_por_grupo(request):
         valores_pagos = [despesas_pagas_por_mes[mes] for mes in despesas_pagas_por_mes]
         valores_abertos = [despesas_abertas_por_mes[mes] for mes in despesas_abertas_por_mes]
 
-        #Gráfico de Barras
+        # Gráfico de Barras
         x = range(len(meses))
 
         plt.figure(figsize=(10, 5))
-        plt.bar(x, valores_pagos, width=0.4, label='Despesas Pagas', align='center')
-        plt.bar(x, valores_abertos, width=0.4, label='Despesas Abertas', align='edge')
+        bars_pagos = plt.bar(x, valores_pagos, width=0.4, label='Despesas Pagas', align='center', color='#5A9')
+        bars_abertos = plt.bar(x, valores_abertos, width=0.4, label='Despesas Abertas', align='edge', color='#FF5733')
+        
         plt.xlabel('Mês de Vencimento')
         plt.ylabel('Valor R$')
         plt.title('Despesas Pagas e Abertas por Mês')
         plt.legend()
         plt.xticks(ticks=x, labels=meses, rotation=45)
         plt.tight_layout()
+
+        # Adicionar valores em cima das barras
+        for bar in bars_pagos:
+            yval = bar.get_height()
+            plt.text(bar.get_x() + bar.get_width()/2, yval, f'{yval:.2f}', ha='center', va='bottom')
+
+        for bar in bars_abertos:
+            yval = bar.get_height()
+            plt.text(bar.get_x() + bar.get_width(), yval, f'{yval:.2f}', ha='center', va='bottom')
 
         buffer = BytesIO()
         plt.savefig(buffer, format='png')
@@ -227,3 +238,30 @@ def relatorio_despesas_por_grupo(request):
     }
 
     return render(request, 'relatorio_despesas_por_grupo.html', context)
+
+def relatorio_geral(request):
+    grupos = GrupoDespesas.objects.all()
+    valores_totais = [Despesa.objects.filter(grupo=grupo).aggregate(Sum('valor'))['valor__sum'] or 0 for grupo in grupos]
+
+    #gráfico de barras
+    plt.figure(figsize=(10, 6))
+    bars = plt.bar([grupo.nome for grupo in grupos], valores_totais, color='#5A9')
+
+    for bar in bars:
+        yval = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2, yval, f'{yval:.2f}', ha='center', va='bottom')
+
+    plt.title('Valor Total por Grupo de Despesas')
+    plt.xlabel('Grupos de Despesas')
+    plt.ylabel('Valor Total')
+
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png')
+    buf.seek(0)
+    image_base64 = base64.b64encode(buf.getvalue()).decode('utf-8')
+    buf.close()
+
+    contexto = {
+        'chart': image_base64
+    }
+    return render(request, 'relatorio_geral.html', contexto)
