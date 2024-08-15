@@ -10,6 +10,8 @@ from django.db.models.functions import TruncMonth
 from io import BytesIO
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+from decimal import Decimal
+import numpy as np
 import urllib, base64
 import io
 
@@ -189,17 +191,19 @@ def relatorio_despesas_por_grupo(request):
         valores_abertos = [despesas_abertas_por_mes[mes] for mes in despesas_abertas_por_mes]
 
         # Gráfico de Barras
-        x = range(len(meses))
+        x = np.arange(len(meses))
+        bar_width = 0.3 if len(meses) <= 3 else 0.4  # Ajuste dinâmico da largura das barras
 
         plt.figure(figsize=(10, 5))
-        bars_pagos = plt.bar(x, valores_pagos, width=0.4, label='Despesas Pagas', align='center', color='#5A9')
-        bars_abertos = plt.bar(x, valores_abertos, width=0.4, label='Despesas Abertas', align='edge', color='#FF5733')
+        bars_pagos = plt.bar(x - bar_width/2, valores_pagos, width=bar_width, label='Despesas Pagas', color='#5A9')
+        bars_abertos = plt.bar(x + bar_width/2, valores_abertos, width=bar_width, label='Despesas Abertas', color='#FF5733')
         
         plt.xlabel('Mês de Vencimento')
         plt.ylabel('Valor R$')
         plt.title('Despesas Pagas e Abertas por Mês')
         plt.legend()
         plt.xticks(ticks=x, labels=meses, rotation=45)
+        plt.xlim(-0.5, len(meses) - 0.5)  # Adiciona espaço em branco ao redor
         plt.tight_layout()
 
         # Adicionar valores em cima das barras
@@ -209,7 +213,7 @@ def relatorio_despesas_por_grupo(request):
 
         for bar in bars_abertos:
             yval = bar.get_height()
-            plt.text(bar.get_x() + bar.get_width(), yval, f'{yval:.2f}', ha='center', va='bottom')
+            plt.text(bar.get_x() + bar.get_width()/2, yval, f'{yval:.2f}', ha='center', va='bottom')
 
         buffer = BytesIO()
         plt.savefig(buffer, format='png')
