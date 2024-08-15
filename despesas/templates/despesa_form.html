@@ -93,7 +93,35 @@
         ul li {
             margin: 5px 0;
         }
+        
+        input[type="text"],
+        input[type="date"],
+        input[type="number"],
+        select,
+        textarea {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 100%;
+            box-sizing: border-box; 
+        }
     </style>
+    <script>
+        function toggleValorPago() {
+            const dataPagamento = document.getElementById('data_pagamento').value;
+            const valorPago = document.getElementById('valor_pago');
+            if (dataPagamento) {
+                valorPago.disabled = false;
+            } else {
+                valorPago.value = '';  //limpa o campo se a data de pagamento for removida
+                valorPago.disabled = true;
+            }
+        }
+
+        function showAlert() {
+            alert("Despesa Cadastrada");
+        }
+    </script>
 </head>
 <body>
     <header>
@@ -104,7 +132,7 @@
     </header>
     <div class="container">
         <h1>Registrar Despesa</h1>
-        <form method="post">
+        <form method="post" onsubmit="showAlert()">
             {% csrf_token %}
             <label for="grupo">Grupo:</label>
             <select id="grupo" name="grupo_id">
@@ -123,10 +151,10 @@
             <input type="number" step="0.01" id="valor" name="valor" required>
 
             <label for="data_pagamento">Data de Pagamento:</label>
-            <input type="date" id="data_pagamento" name="data_pagamento">
+            <input type="date" id="data_pagamento" name="data_pagamento" onchange="toggleValorPago()">
 
             <label for="valor_pago">Valor Pago:</label>
-            <input type="number" step="0.01" id="valor_pago" name="valor_pago">
+            <input type="number" step="0.01" id="valor_pago" name="valor_pago" disabled>
 
             <label for="observacao">Observação:</label>
             <textarea id="observacao" name="observacao"></textarea>
