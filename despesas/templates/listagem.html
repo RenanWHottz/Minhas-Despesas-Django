@@ -43,6 +43,12 @@
         .filter-group select {
             margin: 0 10px;
         }
+        .totals {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
         table {
             width: 90%;
             margin: 0 auto;
@@ -78,10 +84,6 @@
         }
         .btn-group button:hover {
             background-color: #5A9;
-        }
-        tfoot td {
-            font-weight: bold;
-            background-color: #e0e0e0;
         }
     </style>
     <script>
@@ -123,7 +125,7 @@
                         <td>${despesa.valor_pago}</td>
                         <td>${despesa.observacao}</td>
                         <td class="btn-group">
-                            <form method="post" action="/excluir_despesa/${despesa.id}">
+                            <form method="post" action="/excluir_despesa/${despesa.id}/">
                                 <input type="hidden" name="csrfmiddlewaretoken" value="${data.csrf_token}">
                                 <button type="submit">Excluir</button>
                             </form>
@@ -166,26 +168,32 @@
         <a href="{% url 'relatorios' %}">Relatórios</a>
     </header>
     <h1>Listar Despesas</h1>
+
     <div class="filter-group">
-    <input type="text" id="filtro_nome" placeholder="Filtrar por nome...">
-    <label for="data_inicio">Data de Início:</label>
-    <input type="date" id="data_inicio">
-    <label for="data_fim">Data de Fim:</label>
-    <input type="date" id="data_fim">
-    <label for="filtro_estado">Status:</label>
-    <select id="filtro_estado">
-        <option value="todas">Todas</option>
-        <option value="abertas">Abertas</option>
-        <option value="pagas">Pagas</option>
-    </select>
-    <label for="filtro_grupo">Grupo:</label>
-    <select id="filtro_grupo">
-        <option value="">Todos os Grupos</option>
-        {% for grupo in grupos %}
-        <option value="{{ grupo.id }}">{{ grupo.nome }}</option>
-        {% endfor %}
-    </select>
-</div>
+        <input type="text" id="filtro_nome" placeholder="Filtrar por nome...">
+        <label for="data_inicio">Data de Início:</label>
+        <input type="date" id="data_inicio">
+        <label for="data_fim">Data de Fim:</label>
+        <input type="date" id="data_fim">
+        <label for="filtro_estado">Status:</label>
+        <select id="filtro_estado">
+            <option value="todas">Todas</option>
+            <option value="abertas">Abertas</option>
+            <option value="pagas">Pagas</option>
+        </select>
+        <label for="filtro_grupo">Grupo:</label>
+        <select id="filtro_grupo">
+            <option value="">Todos os Grupos</option>
+            {% for grupo in grupos %}
+            <option value="{{ grupo.id }}">{{ grupo.nome }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="totals">
+        <span>Total: R$ <span id="total_valor">0.00</span></span> |  
+        <span>Total Pago: R$ <span id="total_valor_pago">0.00</span></span>
+    </div>
+
     <table>
         <thead>
             <tr>
@@ -221,15 +229,6 @@
             </tr>
             {% endfor %}
         </tbody>
-        <tfoot>
-            <tr>
-                <td colspan="3">Total:</td>
-                <td id="total_valor">0.00</td>
-                <td>Total Pago:</td>
-                <td id="total_valor_pago" colspan="2">0.00</td>
-                <td colspan="1"></td>
-            </tr>
-        </tfoot>
     </table>
 </body>
 </html>
