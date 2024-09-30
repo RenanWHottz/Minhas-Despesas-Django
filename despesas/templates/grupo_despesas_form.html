@@ -95,6 +95,11 @@
             background-color: #5A9;
         }
     </style>
+    <script>
+        function confirmarExclusao() {
+            return confirm("Tem certeza que deseja excluir este grupo de despesas? Todas as despesas associadas também serão excluídas.");
+        }
+    </script>
 </head>
 <body>
     <header>
@@ -125,7 +130,7 @@
                 <tr>
                     <td>{{ grupo.nome }}</td>
                     <td>
-                        <form method="post" action="{% url 'excluir_grupo_despesas' grupo.id %}" style="display:inline;">
+                        <form method="post" action="{% url 'excluir_grupo_despesas' grupo.id %}" style="display:inline;" onsubmit="return confirmarExclusao();">
                             {% csrf_token %}
                             <button type="submit">Excluir</button>
                         </form>
@@ -140,4 +145,5 @@
     </div>
 </body>
 </html>
+
 

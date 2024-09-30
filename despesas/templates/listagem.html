@@ -45,9 +45,26 @@
         }
         .totals {
             text-align: center;
-            margin-bottom: 20px;
-            font-size: 1.2em;
+            margin: 20px auto; 
+            font-size: 1.5em;
             font-weight: bold;
+            padding: 15px;
+            border: 2px solid #5A9;
+            border-radius: 10px;
+            background-color: #eaf6e6;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            width: 80%; 
+            max-width: 600px; 
+        }
+        .totals span {
+            padding: 10px;
+            border-radius: 5px;
+        }
+        #total_valor {
+            color: darkred;
+        }
+        #total_valor_pago {
+            color: darkgreen;
         }
         table {
             width: 90%;
@@ -190,7 +207,7 @@
         </select>
     </div>
     <div class="totals">
-        <span>Total: R$ <span id="total_valor">0.00</span></span> |  
+        <span>Total: R$ <span id="total_valor">0.00</span></span>  
         <span>Total Pago: R$ <span id="total_valor_pago">0.00</span></span>
     </div>
 
