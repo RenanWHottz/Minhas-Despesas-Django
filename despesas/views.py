@@ -5,23 +5,25 @@ from django.http import JsonResponse
 from django.middleware import csrf
 from django.utils.dateparse import parse_date
 from django.db.models import Sum
-from datetime import datetime
 from django.db.models.functions import TruncMonth
 from io import BytesIO
 import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
-from decimal import Decimal
+from django.contrib import messages
 import numpy as np
-import urllib, base64
+import base64
 import io
 
 def grupo_despesas_form(request):
     if request.method == 'POST':
         nome = request.POST.get('nome')
         if nome:
-            GrupoDespesas.objects.create(nome=nome)
+            if GrupoDespesas.objects.filter(nome=nome).exists():
+                messages.error(request, "Esse grupo de despesas já existe.")
+            else:
+                GrupoDespesas.objects.create(nome=nome)
+                messages.success(request, "Grupo de despesas cadastrado com sucesso!")
             return redirect('grupo_despesas_form')
-    
+
     grupos = GrupoDespesas.objects.all()
     return render(request, 'grupo_despesas_form.html', {'grupos': grupos})
 

@@ -118,6 +118,12 @@
         </form>
         
         <h2>Lista de Grupos</h2>
+        {% if messages %}
+                {% for message in messages %}
+                    <h4 style="color: {% if message.tags == 'error' %}red{% elif message.tags == 'success' %}green{% endif %};">
+                        {{ message }}</h4>
+                {% endfor %}
+        {% endif %}
         <table>
             <thead>
                 <tr>
