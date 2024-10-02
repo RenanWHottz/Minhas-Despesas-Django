@@ -275,11 +275,8 @@ def relatorio_geral(request):
 
 def plano_de_contas(request):
     grupos = GrupoDespesas.objects.all()
-
-    # Obter a última despesa por nome (máximo vencimento por nome de despesa)
     latest_despesas = Despesa.objects.values('nome').annotate(ultima_vencimento=Max('vencimento'))
 
-    # Pegar as despesas com a data de vencimento mais recente por nome
     despesas = Despesa.objects.filter(
         nome__in=[despesa['nome'] for despesa in latest_despesas],
         vencimento__in=[despesa['ultima_vencimento'] for despesa in latest_despesas]
