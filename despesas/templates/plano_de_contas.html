@@ -63,13 +63,18 @@
             background-color: #f2f2f2;
         }
 
-        /* Estilo para a observação */
         .obs-input {
             width: 100%;
             padding: 5px;
             border-radius: 3px;
             border: 1px solid #ccc;
             resize: none;
+        }
+
+        .total {
+            font-weight: bold;
+            font-size: 1.3em;
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -84,8 +89,9 @@
     <h1>Plano de Contas</h1>
 
     <div class="group-container">
-        {% for grupo in grupos %}
-            <h2 class="group-title">{{ grupo.nome }}</h2>
+        <div class="total">Total Geral: R$ {{ total_geral|floatformat:2 }}</div>
+        {% for grupo, total_grupo in grupos_totais %}
+            <h2 class="group-title">{{ grupo.nome }} - Total: R$ {{ total_grupo|floatformat:2 }}</h2>
             <table>
                 <thead>
                     <tr>
@@ -104,7 +110,6 @@
                                 <td>{{ despesa.vencimento|date:"d/m/Y" }}</td>
                                 <td>R$ {{ despesa.valor|floatformat:2 }}</td>
                                 <td>{{ despesa.vencimento|date:"m/Y" }}</td>
-                                <!-- Campo de Observações -->
                                 <td>
                                     <textarea class="obs-input" placeholder="Insira observações"></textarea>
                                 </td>

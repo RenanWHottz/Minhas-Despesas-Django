@@ -4,7 +4,7 @@ from .models import GrupoDespesas, Despesa
 from django.http import JsonResponse
 from django.middleware import csrf
 from django.utils.dateparse import parse_date
-from django.db.models import Sum, OuterRef, Subquery, Max
+from django.db.models import Sum, Max
 from django.db.models.functions import TruncMonth
 from io import BytesIO
 import matplotlib.pyplot as plt
@@ -282,8 +282,18 @@ def plano_de_contas(request):
         vencimento__in=[despesa['ultima_vencimento'] for despesa in latest_despesas]
     ).select_related('grupo').order_by('vencimento')
 
+    total_geral = 0
+    grupos_totais = []
+
+    for grupo in grupos:
+        total_grupo = despesas.filter(grupo=grupo).aggregate(Sum('valor'))['valor__sum'] or 0
+        total_geral += total_grupo
+        grupos_totais.append((grupo, total_grupo))
+
     context = {
         'grupos': grupos,
         'despesas': despesas,
+        'total_geral': total_geral,
+        'grupos_totais': grupos_totais,
     }
     return render(request, 'plano_de_contas.html', context)
