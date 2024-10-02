@@ -4,7 +4,7 @@ from .models import GrupoDespesas, Despesa
 from django.http import JsonResponse
 from django.middleware import csrf
 from django.utils.dateparse import parse_date
-from django.db.models import Sum
+from django.db.models import Sum, OuterRef, Subquery, Max
 from django.db.models.functions import TruncMonth
 from io import BytesIO
 import matplotlib.pyplot as plt
@@ -271,3 +271,22 @@ def relatorio_geral(request):
         'chart': image_base64
     }
     return render(request, 'relatorio_geral.html', contexto)
+
+
+def plano_de_contas(request):
+    grupos = GrupoDespesas.objects.all()
+
+    # Obter a última despesa por nome (máximo vencimento por nome de despesa)
+    latest_despesas = Despesa.objects.values('nome').annotate(ultima_vencimento=Max('vencimento'))
+
+    # Pegar as despesas com a data de vencimento mais recente por nome
+    despesas = Despesa.objects.filter(
+        nome__in=[despesa['nome'] for despesa in latest_despesas],
+        vencimento__in=[despesa['ultima_vencimento'] for despesa in latest_despesas]
+    ).select_related('grupo').order_by('vencimento')
+
+    context = {
+        'grupos': grupos,
+        'despesas': despesas,
+    }
+    return render(request, 'plano_de_contas.html', context)

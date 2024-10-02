@@ -12,4 +12,5 @@ urlpatterns = [
     path('relatorios/', views.relatorios, name='relatorios'),
     path('relatorio_despesas_por_grupo/', views.relatorio_despesas_por_grupo, name='relatorio_despesas_por_grupo'),
     path('relatorio_geral/', views.relatorio_geral, name='relatorio_geral'),
+    path('plano_de_contas/', views.plano_de_contas, name='plano_de_contas'),
 ]
