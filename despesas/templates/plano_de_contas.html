@@ -82,6 +82,7 @@
             margin-top: 10px;
         }
     </style>
+    <script src="https://raw.githack.com/eKoopmans/html2pdf/master/dist/html2pdf.bundle.js"></script>
 </head>
 <body>
     <header>
@@ -91,44 +92,55 @@
         <a href="{% url 'relatorios' %}">Relatórios</a>
     </header>
 
-    <h1>Plano de Contas</h1>
-
-    <div class="group-container">
-        <div class="data-atual">Data do Relatório: {{ data_atual|date:"d/m/Y" }}</div>
-        <div class="total">Total Geral: R$ {{ total_geral|floatformat:2 }}</div>
-        {% for grupo, total_grupo in grupos_totais %}
-            <h2 class="group-title">{{ grupo.nome }} - Total: R$ {{ total_grupo|floatformat:2 }}</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Nome da Despesa</th>
-                        <th>Data de Vencimento</th>
-                        <th>Valor</th>
-                        <th>Mês/Ano</th>
-                        <th>Observações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for despesa in despesas %}
-                        {% if despesa.grupo.id == grupo.id %}
-                            <tr>
-                                <td>{{ despesa.nome }}</td>
-                                <td>{{ despesa.vencimento|date:"d/m/Y" }}</td>
-                                <td>R$ {{ despesa.valor|floatformat:2 }}</td>
-                                <td>{{ despesa.vencimento|date:"m/Y" }}</td>
-                                <td>
-                                    <textarea class="obs-input" placeholder="Insira observações"></textarea>
-                                </td>
-                            </tr>
-                        {% endif %}
-                    {% empty %}
+    <button id="gerar-pdf" style="margin: 20px; padding: 10px; background-color: #4A8; color: white; border: none; border-radius: 5px; cursor: pointer;">
+        Salvar como PDF
+    </button>
+    <div id="conteudo-do-pdf">
+        <h1>Plano de Contas</h1>
+        <div class="group-container">
+            <div class="data-atual">Data do Relatório: {{ data_atual|date:"d/m/Y" }}</div>
+            <div class="total">Total Geral: R$ {{ total_geral|floatformat:2 }}</div>
+            {% for grupo, total_grupo in grupos_totais %}
+                <h2 class="group-title">{{ grupo.nome }} - Total: R$ {{ total_grupo|floatformat:2 }}</h2>
+                <table>
+                    <thead>
                         <tr>
-                            <td colspan="5">Nenhuma despesa cadastrada.</td>
+                            <th>Nome da Despesa</th>
+                            <th>Data de Vencimento</th>
+                            <th>Valor</th>
+                            <th>Mês/Ano</th>
+                            <th>Observações</th>
                         </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% endfor %}
+                    </thead>
+                    <tbody>
+                        {% for despesa in despesas %}
+                            {% if despesa.grupo.id == grupo.id %}
+                                <tr>
+                                    <td>{{ despesa.nome }}</td>
+                                    <td>{{ despesa.vencimento|date:"d/m/Y" }}</td>
+                                    <td>R$ {{ despesa.valor|floatformat:2 }}</td>
+                                    <td>{{ despesa.vencimento|date:"m/Y" }}</td>
+                                    <td>
+                                        <textarea class="obs-input" placeholder="Insira observações"></textarea>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        {% empty %}
+                            <tr>
+                                <td colspan="5">Nenhuma despesa cadastrada.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endfor %}
+        </div>
     </div>
+    <script>document.getElementById('gerar-pdf').addEventListener('click', function () {
+        var element = document.getElementById('conteudo-do-pdf');
+        html2pdf()
+            .from(element)
+            .save();
+    });
+    </script>
 </body>
 </html>
