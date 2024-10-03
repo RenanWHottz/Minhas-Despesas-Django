@@ -46,7 +46,7 @@
 
         table {
             width: 100%;
-            margin: 20px 0;
+            margin: 10px 0;
             border-collapse: collapse;
             background-color: white;
             border-radius: 5px;
@@ -54,9 +54,10 @@
         }
 
         th, td {
-            padding: 10px;
+            padding: 5px;
             text-align: left;
             border-bottom: 1px solid #ddd;
+            font-size: 12px;
         }
 
         th {
@@ -76,10 +77,15 @@
             font-size: 1.3em;
             margin-top: 10px;
         }
-        .data-atual{
+
+        .data-atual {
             font-weight: bold;
             font-size: 1.1em;
             margin-top: 10px;
+        }
+
+        table, th, td {
+            page-break-inside: avoid;
         }
     </style>
     <script src="https://raw.githack.com/eKoopmans/html2pdf/master/dist/html2pdf.bundle.js"></script>
@@ -95,6 +101,7 @@
     <button id="gerar-pdf" style="margin: 20px; padding: 10px; background-color: #4A8; color: white; border: none; border-radius: 5px; cursor: pointer;">
         Salvar como PDF
     </button>
+    
     <div id="conteudo-do-pdf">
         <h1>Plano de Contas</h1>
         <div class="group-container">
@@ -121,7 +128,7 @@
                                     <td>R$ {{ despesa.valor|floatformat:2 }}</td>
                                     <td>{{ despesa.vencimento|date:"m/Y" }}</td>
                                     <td>
-                                        <textarea class="obs-input" placeholder="Insira observações" maxlength="15"></textarea>
+                                        <textarea class="obs-input" placeholder="Insira observações" maxlength="20"></textarea>
                                     </td>
                                 </tr>
                             {% endif %}
@@ -140,11 +147,11 @@
                     var element = document.getElementById('conteudo-do-pdf');
         
                     var opt = {
-                        margin:       [10, 10, 20, 10],
-                        filename:     'plano_de_contas.pdf',
-                        html2canvas:  { scale: 2 },
-                        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+                        margin: [5, 5, 10, 5], 
+                        filename: 'plano_de_contas.pdf',
+                        html2canvas: { scale: 1.5 }, 
+                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
                     };
 
                     html2pdf().set(opt).from(element).toPdf().get('pdf').then(function (pdf) {
@@ -162,3 +169,4 @@
     </div>
 </body>
 </html>
+
