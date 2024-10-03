@@ -4,6 +4,7 @@ from .models import GrupoDespesas, Despesa
 from django.http import JsonResponse
 from django.middleware import csrf
 from django.utils.dateparse import parse_date
+from django.utils import timezone
 from django.db.models import Sum, Max
 from django.db.models.functions import TruncMonth
 from io import BytesIO
@@ -274,6 +275,7 @@ def relatorio_geral(request):
 
 
 def plano_de_contas(request):
+    data_atual = timezone.now()
     grupos = GrupoDespesas.objects.all()
     latest_despesas = Despesa.objects.values('nome').annotate(ultima_vencimento=Max('vencimento'))
 
@@ -295,5 +297,6 @@ def plano_de_contas(request):
         'despesas': despesas,
         'total_geral': total_geral,
         'grupos_totais': grupos_totais,
+        'data_atual': data_atual,
     }
     return render(request, 'plano_de_contas.html', context)

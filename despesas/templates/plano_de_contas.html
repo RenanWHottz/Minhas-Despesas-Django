@@ -76,6 +76,11 @@
             font-size: 1.3em;
             margin-top: 10px;
         }
+        .data-atual{
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -89,6 +94,7 @@
     <h1>Plano de Contas</h1>
 
     <div class="group-container">
+        <div class="data-atual">Data do Relatório: {{ data_atual|date:"d/m/Y" }}</div>
         <div class="total">Total Geral: R$ {{ total_geral|floatformat:2 }}</div>
         {% for grupo, total_grupo in grupos_totais %}
             <h2 class="group-title">{{ grupo.nome }} - Total: R$ {{ total_grupo|floatformat:2 }}</h2>
