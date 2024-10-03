@@ -121,7 +121,7 @@
                                     <td>R$ {{ despesa.valor|floatformat:2 }}</td>
                                     <td>{{ despesa.vencimento|date:"m/Y" }}</td>
                                     <td>
-                                        <textarea class="obs-input" placeholder="Insira observações"></textarea>
+                                        <textarea class="obs-input" placeholder="Insira observações" maxlength="15"></textarea>
                                     </td>
                                 </tr>
                             {% endif %}
@@ -134,13 +134,31 @@
                 </table>
             {% endfor %}
         </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                document.getElementById('gerar-pdf').addEventListener('click', function () {
+                    var element = document.getElementById('conteudo-do-pdf');
+        
+                    var opt = {
+                        margin:       [10, 10, 20, 10],
+                        filename:     'plano_de_contas.pdf',
+                        html2canvas:  { scale: 2 },
+                        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+                    };
+
+                    html2pdf().set(opt).from(element).toPdf().get('pdf').then(function (pdf) {
+                        var totalPages = pdf.internal.getNumberOfPages();
+
+                        for (var i = 1; i <= totalPages; i++) {
+                            pdf.setPage(i);
+                            pdf.setFontSize(10);
+                            pdf.text('Página ' + i + ' de ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 10, { align: 'center' });
+                        }
+                    }).save();
+                });
+            });
+        </script>
     </div>
-    <script>document.getElementById('gerar-pdf').addEventListener('click', function () {
-        var element = document.getElementById('conteudo-do-pdf');
-        html2pdf()
-            .from(element)
-            .save();
-    });
-    </script>
 </body>
 </html>
