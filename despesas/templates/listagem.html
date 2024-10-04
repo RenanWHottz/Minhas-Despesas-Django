@@ -142,7 +142,7 @@
                         <td>${despesa.valor_pago}</td>
                         <td>${despesa.observacao}</td>
                         <td class="btn-group">
-                            <form method="post" action="/excluir_despesa/${despesa.id}/">
+                            <form method="post" action="/excluir_despesa/${despesa.id}/" onsubmit="return confirmarExclusao()">
                                 <input type="hidden" name="csrfmiddlewaretoken" value="${data.csrf_token}">
                                 <button type="submit">Excluir</button>
                             </form>
@@ -165,6 +165,10 @@
                 document.getElementById('total_valor_pago').textContent = totalValorPago.toFixed(2);
             });
         }
+        
+        function confirmarExclusao() {
+            return confirm("Tem certeza que deseja excluir esta despesas?");
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('filtro_nome').addEventListener('input', filtrarDespesas);
@@ -174,6 +178,7 @@
             document.getElementById('filtro_grupo').addEventListener('change', filtrarDespesas);
             filtrarDespesas();
         });
+
     </script>
 </head>
 
@@ -235,7 +240,7 @@
                 <td>{{ despesa.valor_pago }}</td>
                 <td>{{ despesa.observacao }}</td>
                 <td class="btn-group">
-                    <form method="post" action="{% url 'excluir_despesa' despesa.id %}">
+                    <form method="post" action="{% url 'excluir_despesa' despesa.id %}" onsubmit="return confirmarExclusao()">
                         {% csrf_token %}
                         <button type="submit">Excluir</button>
                     </form>
