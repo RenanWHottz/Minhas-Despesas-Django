@@ -262,6 +262,9 @@ def relatorio_geral(request):
     plt.xlabel('Grupos de Despesas')
     plt.ylabel('Valor Total')
 
+    plt.xticks(rotation=45, ha='right', fontsize=10)
+    plt.tight_layout()
+
     buf = io.BytesIO()
     plt.savefig(buf, format='png')
     buf.seek(0)
