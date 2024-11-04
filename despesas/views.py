@@ -8,6 +8,7 @@ from django.utils import timezone
 from django.db.models import Sum, Max
 from django.db.models.functions import TruncMonth
 from io import BytesIO
+from datetime import datetime
 import matplotlib.pyplot as plt
 from django.contrib import messages
 import numpy as np
@@ -280,12 +281,27 @@ def relatorio_geral(request):
 def plano_de_contas(request):
     data_atual = timezone.now()
     grupos = GrupoDespesas.objects.all()
-    latest_despesas = Despesa.objects.values('nome').annotate(ultima_vencimento=Max('vencimento'))
+    
+    data_inicio = request.GET.get('data_inicio')
+    data_fim = request.GET.get('data_fim')
 
-    despesas = Despesa.objects.filter(
-        nome__in=[despesa['nome'] for despesa in latest_despesas],
-        vencimento__in=[despesa['ultima_vencimento'] for despesa in latest_despesas]
-    ).select_related('grupo').order_by('vencimento')
+    if data_inicio and data_fim:
+        try:
+            data_inicio = datetime.strptime(data_inicio, "%Y-%m-%d")
+            data_fim = datetime.strptime(data_fim, "%Y-%m-%d")
+        except ValueError:
+            data_inicio, data_fim = None, None  #reseta caso de erro de conversão
+
+    if data_inicio and data_fim:
+        despesas = Despesa.objects.filter(
+            vencimento__range=(data_inicio, data_fim)
+        ).select_related('grupo').order_by('vencimento')
+    else: #busca as últimas despesas caso não utilize o filtro
+        latest_despesas = Despesa.objects.values('nome').annotate(ultima_vencimento=Max('vencimento'))
+        despesas = Despesa.objects.filter(
+            nome__in=[despesa['nome'] for despesa in latest_despesas],
+            vencimento__in=[despesa['ultima_vencimento'] for despesa in latest_despesas]
+        ).select_related('grupo').order_by('vencimento')
 
     total_geral = 0
     grupos_totais = []
@@ -301,5 +317,7 @@ def plano_de_contas(request):
         'total_geral': total_geral,
         'grupos_totais': grupos_totais,
         'data_atual': data_atual,
+        'data_inicio': data_inicio,
+        'data_fim': data_fim,
     }
     return render(request, 'plano_de_contas.html', context)

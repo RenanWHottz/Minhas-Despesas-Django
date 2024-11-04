@@ -102,6 +102,16 @@
         Salvar como PDF
     </button>
     
+    <form method="get" action="{% url 'plano_de_contas' %}" style="display: inline-block; margin-right: 10px;">
+        <label for="data_inicio">Data Início:</label>
+        <input type="date" id="data_inicio" name="data_inicio" value="{{ data_inicio|date:'Y-m-d' }}">
+        <label for="data_fim">Data Fim:</label>
+        <input type="date" id="data_fim" name="data_fim" value="{{ data_fim|date:'Y-m-d' }}">
+        <button type="submit" style="padding: 5px; background-color: #4A8; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            Filtrar
+        </button>
+    </form>
+    
     <div id="conteudo-do-pdf">
         <h1>Plano de Contas</h1>
         <div class="group-container">
