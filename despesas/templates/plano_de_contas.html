@@ -97,12 +97,11 @@
         <a href="{% url 'listagem' %}">Listagem de Despesas</a>
         <a href="{% url 'relatorios' %}">Relatórios</a>
     </header>
-
+    
     <button id="gerar-pdf" style="margin: 20px; padding: 10px; background-color: #4A8; color: white; border: none; border-radius: 5px; cursor: pointer;">
         Salvar como PDF
     </button>
-    
-    <form method="get" action="{% url 'plano_de_contas' %}" style="display: inline-block; margin-right: 10px;">
+    <form method="get" action="{% url 'plano_de_contas' %}" style="display: inline-block; padding: 10px; margin: 20px;">
         <label for="data_inicio">Data Início:</label>
         <input type="date" id="data_inicio" name="data_inicio" value="{{ data_inicio|date:'Y-m-d' }}">
         <label for="data_fim">Data Fim:</label>

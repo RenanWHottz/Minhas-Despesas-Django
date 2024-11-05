@@ -207,7 +207,7 @@ def relatorio_despesas_por_grupo(request):
         plt.title('Despesas Pagas e Abertas por Mês')
         plt.legend()
         plt.xticks(ticks=x, labels=meses, rotation=45)
-        plt.xlim(-0.5, len(meses) - 0.5)  # Adiciona espaço em branco ao redor
+        plt.xlim(-0.5, len(meses) - 0.5)  
         plt.tight_layout()
 
         # Adicionar valores em cima das barras
@@ -321,3 +321,4 @@ def plano_de_contas(request):
         'data_fim': data_fim,
     }
     return render(request, 'plano_de_contas.html', context)
+
