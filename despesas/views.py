@@ -5,15 +5,16 @@ from django.http import JsonResponse
 from django.middleware import csrf
 from django.utils.dateparse import parse_date
 from django.utils import timezone
-from django.db.models import Sum, Max
+from django.db.models import Sum, Min ,Max, Count
 from django.db.models.functions import TruncMonth
-from io import BytesIO
+from django.contrib import messages
 from datetime import datetime
 import matplotlib.pyplot as plt
-from django.contrib import messages
+from collections import defaultdict
 import numpy as np
 import base64
 import io
+from io import BytesIO
 
 def grupo_despesas_form(request):
     if request.method == 'POST':
@@ -287,35 +288,44 @@ def plano_de_contas(request):
 
     if data_inicio and data_fim:
         try:
-            data_inicio = datetime.strptime(data_inicio, "%Y-%m-%d")
-            data_fim = datetime.strptime(data_fim, "%Y-%m-%d")
+            data_inicio = datetime.strptime(data_inicio, "%Y-%m-%d").date()
+            data_fim = datetime.strptime(data_fim, "%Y-%m-%d").date()
         except ValueError:
-            data_inicio, data_fim = None, None  #reseta caso de erro de conversão
+            data_inicio, data_fim = None, None
 
     if data_inicio and data_fim:
         despesas = Despesa.objects.filter(
             vencimento__range=(data_inicio, data_fim)
-        ).select_related('grupo').order_by('vencimento')
-    else: #busca as últimas despesas caso não utilize o filtro
+        ).select_related('grupo')
+    else:
         latest_despesas = Despesa.objects.values('nome').annotate(ultima_vencimento=Max('vencimento'))
         despesas = Despesa.objects.filter(
-            nome__in=[despesa['nome'] for despesa in latest_despesas],
-            vencimento__in=[despesa['ultima_vencimento'] for despesa in latest_despesas]
-        ).select_related('grupo').order_by('vencimento')
+            nome__in=[d['nome'] for d in latest_despesas],
+            vencimento__in=[d['ultima_vencimento'] for d in latest_despesas]
+        ).select_related('grupo')
 
-    total_geral = 0
+    agregado = despesas.values('grupo', 'nome').annotate(
+        total_valor=Sum('valor'),
+        primeiro_vencimento=Min('vencimento'),
+        ultimo_vencimento=Max('vencimento'),
+        quantidade=Count('id')
+    ).order_by('grupo', 'nome')
+
+    agregado_por_grupo = defaultdict(list)
+    for entrada in agregado:
+        agregado_por_grupo[entrada['grupo']].append(entrada)
+
     grupos_totais = []
-
+    total_geral = 0
     for grupo in grupos:
-        total_grupo = despesas.filter(grupo=grupo).aggregate(Sum('valor'))['valor__sum'] or 0
+        entradas = agregado_por_grupo.get(grupo.id, [])
+        total_grupo = sum(e['total_valor'] for e in entradas)
         total_geral += total_grupo
-        grupos_totais.append((grupo, total_grupo))
+        grupos_totais.append((grupo, total_grupo, entradas))
 
     context = {
-        'grupos': grupos,
-        'despesas': despesas,
-        'total_geral': total_geral,
         'grupos_totais': grupos_totais,
+        'total_geral': total_geral,
         'data_atual': data_atual,
         'data_inicio': data_inicio,
         'data_fim': data_fim,

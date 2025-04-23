@@ -116,7 +116,7 @@
         <div class="group-container">
             <div class="data-atual">Data do Relatório: {{ data_atual|date:"d/m/Y" }}</div>
             <div class="total">Total Geral: R$ {{ total_geral|floatformat:2 }}</div>
-            {% for grupo, total_grupo in grupos_totais %}
+            {% for grupo, total_grupo, entradas in grupos_totais %}
                 <h2 class="group-title">{{ grupo.nome }} - Total: R$ {{ total_grupo|floatformat:2 }}</h2>
                 <table>
                     <thead>
@@ -129,18 +129,28 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for despesa in despesas %}
-                            {% if despesa.grupo.id == grupo.id %}
-                                <tr>
-                                    <td>{{ despesa.nome }}</td>
-                                    <td>{{ despesa.vencimento|date:"d/m/Y" }}</td>
-                                    <td>R$ {{ despesa.valor|floatformat:2 }}</td>
-                                    <td>{{ despesa.vencimento|date:"m/Y" }}</td>
-                                    <td>
-                                        <textarea class="obs-input" placeholder="Insira observações" maxlength="20"></textarea>
-                                    </td>
-                                </tr>
-                            {% endif %}
+                        {% for entrada in entradas %}
+                            <tr>
+                                <td>{{ entrada.nome }}</td>
+                                <td>
+                                    {% if entrada.quantidade > 1 %}
+                                        {{ entrada.primeiro_vencimento|date:"d/m/Y" }} a {{ entrada.ultimo_vencimento|date:"d/m/Y" }}
+                                    {% else %}
+                                        {{ entrada.primeiro_vencimento|date:"d/m/Y" }}
+                                    {% endif %}
+                                </td>
+                                <td>R$ {{ entrada.total_valor|floatformat:2 }}</td>
+                                <td>
+                                    {% if entrada.quantidade > 1 %}
+                                        Vários
+                                    {% else %}
+                                        {{ entrada.primeiro_vencimento|date:"m/Y" }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <textarea class="obs-input" placeholder="Insira observações" maxlength="20"></textarea>
+                                </td>
+                            </tr>
                         {% empty %}
                             <tr>
                                 <td colspan="5">Nenhuma despesa cadastrada.</td>
